@@ -1,0 +1,43 @@
+#!/bin/bash
+
+set -x
+
+CURDIR=$(cd $(dirname $0); pwd)
+CONFIGFILE=$CURDIR/gpinitsystem_config
+CONFIGTEMPLATE=$CURDIR/gpinitsystem_config_template
+HOSTFILETEMPLATE=$CURDIR/hostfile_template
+HOSTFILE=$CURDIR/hostfile
+
+
+PORT_BASE=10000
+PREFIX=$CURDIR
+MASTERHOST=MASTERHOSTADDR
+MASTER_PORT=5432
+MIRROR_PORT_BASE=30000
+REPLICATION_PORT_BASE=31000
+MIRROR_REPLICATION_PORT_BASE=32000
+STARTDB=test
+
+
+rm -ir $PREFIX/master $PREFIX/data $PREFIX/mirror
+mkdir $PREFIX/master $PREFIX/data $PREFIX/mirror
+
+sed "s/%%PORT_BASE%%/$PORT_BASE/g; s|%%PREFIX%%|$PREFIX|g; s/%%MASTERHOST%%/$MASTERHOST/g; s/%%MASTER_PORT%%/$MASTER_PORT/g; s/%%MIRROR_PORT_BASE%%/$MIRROR_PORT_BASE/g; s/%%REPLICATION_PORT_BASE%%/$REPLICATION_PORT_BASE/g; s/%%MIRROR_REPLICATION_PORT_BASE%%/$MIRROR_REPLICATION_PORT_BASE/g; s/%%STARTDB%%/$STARTDB/g;" $CONFIGTEMPLATE >$CONFIGFILE 
+sed "s/%%MASTERHOST%%/$MASTERHOST/g" $HOSTFILETEMPLATE > $HOSTFILE 
+
+
+SRCDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $SRCDIR/greenplum-db/greenplum_path.sh
+export MASTER_DATA_DIRECTORY=$SRCDIR/master/gpseg-1
+export PGPORT=5432
+export PGHOST=127.0.0.1
+export PGDATABASE=testdb
+
+cat <<EOF > $CURDIR/env.sh
+SRCDIR="\$( cd "\$( dirname "\${BASH_SOURCE[0]}" )" && pwd )"
+source \$SRCDIR/greenplum-db/greenplum_path.sh
+export MASTER_DATA_DIRECTORY=\$SRCDIR/master/gpseg-1
+export PGPORT=$MASTER_PORT
+export PGHOST=127.0.0.1
+export PGDATABASE=$STARTDB
+EOF
