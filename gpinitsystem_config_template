@@ -22,7 +22,7 @@ PORT_BASE=%%PORT_BASE%%
 #### physical host (if multiple addresses for a host are listed in 
 #### the hostfile, the number of segments will be spread evenly across
 #### the specified interface addresses).
-declare -a DATA_DIRECTORY=(%%PREFIX%%/data)
+declare -a DATA_DIRECTORY=(%%SEGDATASTR%%)
 
 #### OS-configured hostname or IP address of the master host.
 MASTER_HOSTNAME=%%MASTERHOST%%
