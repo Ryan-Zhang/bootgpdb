@@ -1,0 +1,14 @@
+#!/usr/bin/env  ansible-playbook
+
+---
+- name: Setup Hostname
+  serial: 5
+  hosts: all
+  tasks:
+   - hostname: name={{ inventory_hostname }}
+
+- name: Update hosts configuration
+  hosts: all
+  serial: 0
+  roles:
+    - bootstrap		  

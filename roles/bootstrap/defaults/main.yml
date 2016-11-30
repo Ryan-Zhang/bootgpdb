@@ -1,0 +1,9 @@
+---
+enable_passowrd_login: true
+user_password: "$6$hSo1YSa02yK$ghkI3FQ.P1piEa8x68VmGqn6bgKorcNOUlr8V6K.j7/EFKxGMW0FX7dR022QQjoe23KMDILceC9rS3MXKrbSq0"
+user_name: gpadmin
+
+mount_external_volume: true
+external_voleme_device: /dev/xvdb
+external_volume_mount_point: /opt/database
+

@@ -99,3 +99,12 @@ export PGPORT=$MASTER_PORT
 export PGHOST=$MASTER
 export PGDATABASE=$STARTDB
 EOF
+
+cat <<EOF > $CURDIR/cleanup.sh
+#!/bin/bash
+source $GPHOME/greenplum_path.sh
+gpstop -a
+killall -9 postgres
+rm -f /tmp/.s.PGSQL.*
+rm -rf data/* master/* mirror/*
+EOF

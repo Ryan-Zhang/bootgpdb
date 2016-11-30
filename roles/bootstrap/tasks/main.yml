@@ -1,0 +1,170 @@
+---
+
+- name: run stats
+  shell: /bin/true
+  register: normal_task_list
+
+- name: Update host file
+  lineinfile:
+    dest: /etc/hosts
+    state: present
+    # line: "{{ hostvars[item]['ansible_ssh_host'] }} {{ hostvars[item]['ansible_hostname'] }} {{ hostvars[item]['ansible_hostname'].split('.')[0] }}"
+    line: "{{ hostvars[item]['ansible_eth0']['ipv4']['address'] }} {{ hostvars[item]['ansible_hostname'] }} {{ hostvars[item]['ansible_hostname'].split('.')[0] }}"
+  with_items: "{{groups['all']}}"
+
+- name: Update sysconfig
+  lineinfile:
+    dest: /etc/sysctl.conf
+    regexp: "^{{ item.option }}"
+    insertafter: "^#{{ item.option }}"
+    line: "{{ item.option }} = {{ item.value }}"
+  with_items:
+    - { option: 'kernel.shmmax', value: '500000000' }
+    - { option: 'kernel.shmmni', value: '4096' }
+    - { option: 'kernel.shmall', value: '4000000000' }
+    - { option: 'kernel.sem', value: '250 512000 100 2048' }
+    - { option: 'kernel.sysrq', value: '1' }
+    - { option: 'kernel.core_uses_pid', value: '1' }
+    - { option: 'kernel.msgmnb', value: '65536' }
+    - { option: 'kernel.msgmax', value: '65536' }
+    - { option: 'kernel.msgmni', value: '2048' }
+    - { option: 'net.ipv4.tcp_syncookies', value: '1' }
+    - { option: 'net.ipv4.ip_forward', value: '0' }
+    - { option: 'net.ipv4.conf.default.accept_source_route', value: '0' }
+    - { option: 'net.ipv4.tcp_tw_recycle', value: '1' }
+    - { option: 'net.ipv4.tcp_max_syn_backlog', value: '4096' }
+    - { option: 'net.ipv4.conf.all.arp_filter', value: '1' }
+    - { option: 'net.ipv4.ip_local_port_range', value: '1025 65535' }
+    - { option: 'net.core.netdev_max_backlog', value: '10000' }
+    - { option: 'net.core.rmem_max', value: '2097152' }
+    - { option: 'net.core.wmem_max', value: '2097152' }
+    - { option: 'vm.overcommit_memory', value: '2' }
+
+- name: Update limits
+  lineinfile:
+    dest: /etc/security/limits.conf
+    regexp: "^{{ user_name }} {{ item.option }}"
+    insertafter: "^#{{ user_name }} {{ item.option }}"
+    line: "{{ user_name }} {{ item.option }} {{ item.value }}"
+  with_items:
+    - { option: 'soft nofile', value: '65536' }
+    - { option: 'hard nofile', value: '65536' }
+    - { option: 'soft nproc', value: '131072' }
+    - { option: 'hard nproc', value: '131072' }
+
+- name: Update login
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "^PasswordAuthentication"
+    insertafter: "^#PasswordAuthentication"
+    line: "PasswordAuthentication yes"
+  when:
+    - enable_passowrd_login  == true
+
+- name: ensure user
+  user:
+    name: "{{ user_name }}"
+    password: "{{ user_password }}"
+    generate_ssh_key: yes
+    state: present
+
+- name: Update sudoer
+  lineinfile:
+    dest: /etc/sudoers
+    line: "{{ user_name }} ALL=(ALL)   NOPASSWD:ALL"
+
+- name: Creates directory
+  file:
+    path: "{{ external_volume_mount_point }}"
+    state: directory
+    mode: 0755
+
+- name: Prepare data volume
+  filesystem:
+    fstype: ext3
+    dev: "{{ external_voleme_device }}"
+  when:
+    - mount_external_volume == true
+
+- name: mount data volume
+  mount:
+    name: "{{ external_volume_mount_point }}"
+    src: "{{ external_voleme_device }}"
+    state: present
+    fstype: ext3
+  when:
+    - mount_external_volume == true
+
+- name: change data volume owner
+  file:
+    path: "{{ external_volume_mount_point }}"
+    owner: "{{ user_name }}"
+    mode: 0755
+
+- name: Create ssh key
+  user: 
+    name: "{{user_name}}"
+    generate_ssh_key: yes
+    ssh_key_bits: 2048
+    ssh_key_file: "/home/{{user_name}}/.ssh/id_rsa"
+
+- name: Fetch master id
+  fetch: 
+    src: "/home/{{ user_name }}/.ssh/id_rsa.pub"
+    dest: /tmp/
+  when:
+    - inventory_hostname == "mdw"
+
+- name: Set up authorized_keys for the user
+  authorized_key: 
+    user: "{{ user_name }}" 
+    key: "{{ item }}"
+  with_file:
+    - "/tmp/mdw/home/{{ user_name }}/.ssh/id_rsa.pub"
+
+- name: Update ssh config
+  copy: 
+    src: ssh_config
+    dest: "/home/{{ user_name }}/.ssh/config"
+    owner: "{{user_name}}"
+    mode: 0400
+  when:
+    - inventory_hostname == "mdw"
+
+- name: Install missing package
+  package: name={{ item }} state=present
+  with_items:
+    - which
+    - vim
+    - sed
+
+- name: restart machine
+  shell: shutdown -r now "Ansible updates triggered"
+
+- name: Wait for SSH to start
+  local_action: wait_for host={{ hostvars[item]['ansible_ssh_host'] }}  port=22 delay=10
+  with_items: "{{groups['all']}}"
+  when:
+    - inventory_hostname == "mdw"
+
+- name: Config utility script
+  copy:
+    src: "{{item}}"
+    dest: "{{external_volume_mount_point}}"
+    owner: "{{user_name}}"
+    mode: 0644
+  with_items:
+    - gpinitsystem_config_template
+  when:
+    - inventory_hostname == "mdw"
+
+- name: Config utility script
+  copy:
+    src: "{{item}}"
+    dest: "{{external_volume_mount_point}}"
+    owner: "{{user_name}}"
+    mode: 0755
+  with_items:
+    - prepare.sh
+  when:
+    - inventory_hostname == "mdw"

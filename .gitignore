@@ -1,4 +1,6 @@
 *~
-env.sh
-gpinitsystem_config
-hostfile
+py
+hosts
+*.pem
+*.retry
+*.pyc
