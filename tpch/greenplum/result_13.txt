@@ -1,0 +1,9 @@
+ c_count | custdist 
+---------+----------
+       0 |   500023
+(1 row)
+
+
+real	0m19.295s
+user	0m0.001s
+sys	0m0.001s

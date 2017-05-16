@@ -1,0 +1,11 @@
+CREATE VIEW
+ s_suppkey |          s_name           |         s_address          |     s_phone     | total_revenue 
+-----------+---------------------------+----------------------------+-----------------+---------------
+      7916 | Supplier#000007916        | h0yS1ULM2u53tqGxDg2L4eYtxw | 21-673-623-7279 |  2125571.0236
+(1 row)
+
+DROP VIEW
+
+real	1m54.266s
+user	0m0.000s
+sys	0m0.003s

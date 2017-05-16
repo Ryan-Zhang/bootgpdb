@@ -1,0 +1,9 @@
+ o_orderpriority | order_count 
+-----------------+-------------
+ 1-URGENT        |      105768
+(1 row)
+
+
+real	1m12.966s
+user	0m0.002s
+sys	0m0.000s

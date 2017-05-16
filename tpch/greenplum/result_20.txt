@@ -1,0 +1,9 @@
+          s_name           |     s_address      
+---------------------------+--------------------
+ Supplier#000000010        | Saygah3gYWMp72i PY
+(1 row)
+
+
+real	1m12.885s
+user	0m0.001s
+sys	0m0.001s

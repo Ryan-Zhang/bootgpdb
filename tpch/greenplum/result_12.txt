@@ -1,0 +1,9 @@
+ l_shipmode | high_line_count | low_line_count 
+------------+-----------------+----------------
+ RAIL       |           62457 |          93405
+(1 row)
+
+
+real	1m10.396s
+user	0m0.001s
+sys	0m0.001s

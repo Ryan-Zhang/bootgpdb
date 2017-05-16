@@ -1,0 +1,9 @@
+ cntrycode | numcust | totacctbal  
+-----------+---------+-------------
+ 15        |    9032 | 67817457.92
+(1 row)
+
+
+real	0m18.566s
+user	0m0.002s
+sys	0m0.001s

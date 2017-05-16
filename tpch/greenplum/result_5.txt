@@ -1,0 +1,5 @@
+psql:queries/5.sql:28: ERROR:  could not write to temporary file: No space left on device  (seg0 slice7 sdw1:10000 pid=31747)
+
+real	8m56.241s
+user	0m0.000s
+sys	0m0.002s

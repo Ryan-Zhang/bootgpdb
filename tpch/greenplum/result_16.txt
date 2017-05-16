@@ -1,0 +1,9 @@
+  p_brand   |         p_type         | p_size | supplier_cnt 
+------------+------------------------+--------+--------------
+ Brand#41   | ECONOMY POLISHED BRASS |     16 |          104
+(1 row)
+
+
+real	0m12.400s
+user	0m0.001s
+sys	0m0.002s

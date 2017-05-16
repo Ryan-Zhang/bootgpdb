@@ -1,0 +1,8 @@
+ ps_partkey | value 
+------------+-------
+(0 rows)
+
+
+real	0m14.457s
+user	0m0.001s
+sys	0m0.001s
