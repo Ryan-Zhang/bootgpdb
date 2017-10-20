@@ -4,7 +4,7 @@ set -x
 if [ -z ${GPHOME+x} ]; then echo "GPHOME is unset";exit 1 ; fi
 
 
-MASTERHOST=mdw
+MASTERHOST=`hostname`
 SEG_PREFIX=sdw
 SEG_HOSTNUM=0 # 0 means muster only
 SEG_NUMPERHOST=1
