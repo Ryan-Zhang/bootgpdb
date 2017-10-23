@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+from __future__ import print_function
+import argparse, random
+from faker import Faker
+
+whitespace = ' \t' # removed \r \n \f \v
+digits = '0123456789'
+lowercase = 'abcdefghijklmnopqrstuvwxyz'
+uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+letters = lowercase + uppercase
+punctuation = """!"#$%&'()*+,-./:;<=>?@[\]^_`{}~"""  # removed |
+
+printable = digits + letters + punctuation + whitespace
+fake = Faker()
+
+def create_random_str_generater(len=64, end = '|'):
+    def f():
+        print(''.join(random.choice(printable) for i in range(len)), end=end)
+    return f
+
+def create_random_int_generater(len=4, end = '|'):
+    maxval = 2**(8*len)
+    def f():
+        print(random.randint(0, maxval), end=end)
+    return f
+
+def create_random_char_generater(end = '|'):
+    def f():
+        print(random.choice(printable), end=end)
+    return f
+
+def create_random_float_generater(a,b, end = '|'):
+    maxdig = 10*a
+    maxfrag = 10*b
+    def f():
+        print('{0}.{1}'.format(random.randint(0, maxdig),random.randint(0, maxfrag)), end=end)
+    return f
+
+def create_random_date_generater():
+    def f():
+        print(str(fake.date_time()), end='|')
+    return f
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='generate sample data')
+    parser.add_argument('-n', '--number',type=int, default=1,
+                        help='line numbers')
+
+    args = parser.parse_args()
+    gens = []
+    gens.append( create_random_int_generater())
+    gens.append( create_random_int_generater())
+    gens.append( create_random_int_generater())
+    gens.append( create_random_int_generater())
+    gens.append( create_random_float_generater(15,2))
+    gens.append( create_random_float_generater(15,2))
+    gens.append( create_random_float_generater(15,2))
+    gens.append( create_random_float_generater(15,2))
+    gens.append( create_random_char_generater())
+    gens.append( create_random_char_generater())
+
+    gens.append( create_random_date_generater())
+    gens.append( create_random_date_generater())
+    gens.append( create_random_date_generater())
+
+    gens.append( create_random_str_generater(25))
+    gens.append( create_random_str_generater(10))
+    gens.append( create_random_str_generater(44, "\n"))
+
+    for l in range(args.number):
+        for i in gens: i()
